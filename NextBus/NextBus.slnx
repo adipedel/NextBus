@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="NextBus.API/NextBus.API.csproj" Id="16ce7f1f-7581-4144-b66e-34029b491c42" />
+  <Project Path="NextBus.Mobile/NextBus.Mobile.csproj" Id="fdfbe4de-4120-48d1-9509-a107686277ca" />
+  <Project Path="NextBus.Shared/NextBus.Shared.csproj" Id="8944a5f9-ae4f-4ec0-b515-33fc6cacd9fe" />
+</Solution>
