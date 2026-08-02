@@ -1,24 +1,35 @@
-﻿namespace NextBus.Mobile
+﻿using NextBus.Mobile.Services;
+
+namespace NextBus.Mobile
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
+        private readonly ApiService _apiService;
 
         public MainPage()
         {
             InitializeComponent();
+            _apiService = new ApiService();
         }
 
-        private void OnCounterClicked(object? sender, EventArgs e)
+        // אירוע שלחיצה על הכפתור מפעילה
+        private async void OnLoadStationsClicked(object sender, EventArgs e)
         {
-            count++;
+            // הצגת האנימציה של הטעינה
+            LoadingIndicator.IsVisible = true;
+            LoadingIndicator.IsRunning = true;
+            LoadStationsBtn.IsEnabled = false;
 
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
+            // שליפת התחנות מה-API בשרת
+            var stations = await _apiService.GetStationsAsync();
 
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            // עדכון הרשימה במסך במידע שהתקבל
+            StationsCollectionView.ItemsSource = stations;
+
+            // הסתרת אנימציית הטעינה
+            LoadingIndicator.IsRunning = false;
+            LoadingIndicator.IsVisible = false;
+            LoadStationsBtn.IsEnabled = true;
         }
     }
 }
