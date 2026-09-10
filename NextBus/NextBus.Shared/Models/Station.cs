@@ -7,6 +7,7 @@
         public string StationCode { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        public double DistanceInMeters { get; set; }
         public List<Line> PassingLines { get; set; } = new List<Line>();
     }
 }

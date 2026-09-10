@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="NextBus.Mobile.RoutesPage"
+             Title="תכנון מסלול"
+             FlowDirection="RightToLeft">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- כותרת -->
+            <Label Text="🔍 חיפוש מסלול נסיעה"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#1E88E5" />
+
+            <!-- שדות קלט למוצא ויעד -->
+            <Frame Padding="15" CornerRadius="10" BorderColor="#E0E0E0" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Entry x:Name="OriginEntry"
+                           Placeholder="מאיפה יוצאים? (למשל: תל אביב)"
+                           FontSize="16" />
+
+                    <Entry x:Name="DestinationEntry"
+                           Placeholder="לאן נוסעים? (למשל: חיפה)"
+                           FontSize="16" />
+
+                    <Button Text="חפש מסלול"
+                            Clicked="OnSearchRoutesClicked"
+                            BackgroundColor="#1E88E5"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Margin="0,10,0,0" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- חיווי טעינה -->
+            <ActivityIndicator x:Name="LoadingIndicator"
+                               IsRunning="False"
+                               IsVisible="False"
+                               HorizontalOptions="Center" />
+
+            <!-- רשימת תוצאות המסלולים -->
+            <CollectionView x:Name="RoutesCollectionView"
+                            SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,5"
+                               Padding="15"
+                               BorderColor="#1E88E5"
+                               CornerRadius="10"
+                               HasShadow="True">
+                            <VerticalStackLayout Spacing="8">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="⏱️ משך נסיעה:" FontAttributes="Bold" FontSize="16" />
+                                    <Label Text="{Binding TotalDuration, StringFormat='{0} דקות'}" FontSize="16" TextColor="#D32F2F" FontAttributes="Bold" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="🕒 יציאה:" FontSize="14" TextColor="#666666" />
+                                    <Label Text="{Binding DepartureTime, StringFormat='{0:HH:mm}'}" FontSize="14" FontAttributes="Bold" />
+                                    <Label Text="הגעה משוערת:" FontSize="14" TextColor="#666666" Margin="10,0,0,0" />
+                                    <Label Text="{Binding ArrivalTime, StringFormat='{0:HH:mm}'}" FontSize="14" FontAttributes="Bold" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="NextBus.Mobile.StationDetailsPage"
+             FlowDirection="RightToLeft">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <Label x:Name="StationTitleLabel"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="#1E88E5"
+                   HorizontalOptions="Center" />
+
+            <Label Text="זמני הגעה בזמן אמת:"
+                   FontSize="16"
+                   FontAttributes="Bold" />
+
+            <ActivityIndicator x:Name="LoadingIndicator"
+                               IsRunning="True"
+                               IsVisible="True"
+                               HorizontalOptions="Center" />
+
+            <CollectionView x:Name="ArrivalsCollectionView"
+                            SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,5"
+                               Padding="15"
+                               BorderColor="#E0E0E0"
+                               CornerRadius="10"
+                               HasShadow="True">
+                            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
+                                    <Label Text="קו" FontSize="18" FontAttributes="Bold" />
+                                    <Label Text="{Binding LineId}" FontSize="18" FontAttributes="Bold" TextColor="#1E88E5" />
+                                </HorizontalStackLayout>
+
+                                <Label Grid.Row="1" Grid.Column="0"
+                                       Text="{Binding EstimatedTime, StringFormat='הגעה משוערת: {0:HH:mm}'}"
+                                       FontSize="13"
+                                       TextColor="#666666" />
+
+                                <Frame Grid.RowSpan="2" Grid.Column="1"
+                                       BackgroundColor="#E3F2FD"
+                                       BorderColor="Transparent"
+                                       Padding="10,5"
+                                       CornerRadius="8"
+                                       VerticalOptions="Center">
+                                    <Label Text="{Binding MinutesToArrival, StringFormat='בעוד {0} דקות'}"
+                                           TextColor="#0D47A1"
+                                           FontAttributes="Bold"
+                                           FontSize="14" />
+                                </Frame>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label x:Name="EmptyLabel"
+                   Text="אין נתוני הגעה כרגע לתחנה זו"
+                   IsVisible="False"
+                   HorizontalOptions="Center"
+                   TextColor="#888888"
+                   Margin="0,20,0,0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

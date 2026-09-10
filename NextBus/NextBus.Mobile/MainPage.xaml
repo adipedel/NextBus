@@ -2,63 +2,64 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="NextBus.Mobile.MainPage"
-             Title="NextBus - תחנות קרובות"
+             Title="NextBus - תחנות"
              FlowDirection="RightToLeft">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+    <Grid RowDefinitions="Auto, Auto, *">
 
-            <!-- כותרת הראש הראשית -->
-            <Label Text="🚌 NextBus"
-                   FontSize="28"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   TextColor="#1E88E5" />
+        <!-- פס חיפוש עליון -->
+        <SearchBar x:Name="StationSearchBar"
+                   Grid.Row="0"
+                   Placeholder="חיפוש לפי שם או קוד תחנה..."
+                   TextChanged="OnSearchTextChanged"
+                   Margin="10" />
 
-            <Label Text="תחנות אוטובוס בסביבתך:"
-                   FontSize="18"
-                   FontAttributes="Bold" />
+        <!-- חיווי טעינה -->
+        <ActivityIndicator x:Name="LoadingIndicator"
+                           Grid.Row="1"
+                           IsRunning="True"
+                           IsVisible="True"
+                           HorizontalOptions="Center"
+                           Margin="10" />
 
-            <!-- כפתור לרענון/טעינת התחנות -->
-            <Button x:Name="LoadStationsBtn"
-                    Text="רענן תחנות"
-                    Clicked="OnLoadStationsClicked"
-                    BackgroundColor="#1E88E5"
-                    TextColor="White"
-                    CornerRadius="10" />
-
-            <!-- חיווי טעינה בזמן פנייה ל-API -->
-            <ActivityIndicator x:Name="LoadingIndicator"
-                               IsRunning="False"
-                               IsVisible="False"
-                               HorizontalOptions="Center" />
-
-            <!-- רשימה להצגת התחנות -->
-            <CollectionView x:Name="StationsCollectionView"
-                            SelectionMode="None">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Margin="0,5"
-                               Padding="15"
-                               BorderColor="#E0E0E0"
-                               CornerRadius="10"
-                               HasShadow="True">
-                            <VerticalStackLayout Spacing="5">
+        <!-- רשימת התחנות -->
+        <CollectionView x:Name="StationsCollectionView"
+                        Grid.Row="2"
+                        SelectionMode="Single"
+                        SelectionChanged="OnStationSelected"
+                        Margin="10,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5"
+                           Padding="15"
+                           BorderColor="#E0E0E0"
+                           CornerRadius="10"
+                           HasShadow="True">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{Binding Name}"
-                                       FontSize="18"
+                                       FontSize="17"
                                        FontAttributes="Bold"
                                        TextColor="#333333" />
 
                                 <Label Text="{Binding StationCode, StringFormat='קוד תחנה: {0}'}"
-                                       FontSize="14"
+                                       FontSize="13"
                                        TextColor="#666666" />
                             </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                            <!-- הצגת מרחק במטרים -->
+                            <Label Grid.Column="1"
+                                   Text="{Binding DistanceInMeters, StringFormat='{0:F0} מטר'}"
+                                   VerticalOptions="Center"
+                                   TextColor="#1E88E5"
+                                   FontAttributes="Bold"
+                                   FontSize="15" />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
 
 </ContentPage>

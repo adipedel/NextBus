@@ -47,5 +47,19 @@ namespace NextBus.Mobile.Services
                 return new List<ArrivalRealTime>();
             }
         }
+
+        public async Task<List<RouteSolution>> SearchRoutesAsync(string origin, string destination)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<List<RouteSolution>>($"routes/search?origin={Uri.EscapeDataString(origin)}&destination={Uri.EscapeDataString(destination)}");
+                return response ?? new List<RouteSolution>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error searching routes: {ex.Message}");
+                return new List<RouteSolution>();
+            }
+        }
     }
 }
