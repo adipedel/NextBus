@@ -61,5 +61,20 @@ namespace NextBus.Mobile.Services
                 return new List<RouteSolution>();
             }
         }
+
+        public async Task<List<RouteSolution>> PlanRouteAsync(double fromLat, double fromLon, double toLat, double toLon)
+        {
+            try
+            {
+                var url = $"routes/plan?fromLat={fromLat}&fromLon={fromLon}&toLat={toLat}&toLon={toLon}";
+                var response = await _httpClient.GetFromJsonAsync<List<RouteSolution>>(url);
+                return response ?? new List<RouteSolution>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error planning route: {ex.Message}");
+                return new List<RouteSolution>();
+            }
+        }
     }
 }

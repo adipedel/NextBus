@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NextBus.API.Data;
 using NextBus.Shared.Models;
 
 namespace NextBus.API.Controllers
@@ -8,72 +9,61 @@ namespace NextBus.API.Controllers
     [Route("api/[controller]")]
     public class StationsController : ControllerBase
     {
-        private static readonly List<Station> MockStations = new List<Station>
+        private readonly AppDbContext _context;
+
+        public StationsController(AppDbContext context)
         {
-            new Station
-            {
-                StationId = 1,
-                Name = "תחנת רכבת מרכז",
-                StationCode = "21453",
-                Latitude = 32.0833,
-                Longitude = 34.7958
-            },
-            new Station
-            {
-                StationId = 2,
-                Name = "קניון עזריאלי",
-                StationCode = "21589",
-                Latitude = 32.0746,
-                Longitude = 34.7920
-            }
-        };
-        
-        // GET: api/stations
+            _context = context;
+        }
+
         [HttpGet]
-        public ActionResult<IEnumerable<Station>> GetAllStations()
+        public async Task<ActionResult<List<Station>>> GetAllStations()
         {
-            return Ok(MockStations);
+            var stations = await _context.Stations.ToListAsync();
+            return Ok(stations);
         }
 
-        // GET: api/stations/1
-        [HttpGet("{id}")]
-        public ActionResult<Station> GetStationById(int id)
-        {
-            var station = MockStations.FirstOrDefault(s => s.StationId == id);
-            if (station == null)
-            {
-                return NotFound(new { Message = "Station not found" });
-            }
-            return Ok(station);
-        }
-
-        // GET: api/stations/1/arrivals
         [HttpGet("{id}/arrivals")]
-        public ActionResult<IEnumerable<ArrivalRealTime>> GetStationArrivals(int id)
+        public ActionResult<List<ArrivalRealTime>> GetStationArrivals(int id)
         {
+            // נתוני זמן אמת עדיין מחושבים דינמית לפי שעה נוכחית
             var arrivals = new List<ArrivalRealTime>
-    {
-        new ArrivalRealTime
-        {
-            TripId = 101,
-            LineId = 1,
-            StationId = id,
-            ScheduledTime = DateTime.Now.AddMinutes(5),
-            EstimatedTime = DateTime.Now.AddMinutes(4),
-            MinutesToArrival = 4
-        },
-        new ArrivalRealTime
-        {
-            TripId = 102,
-            LineId = 2,
-            StationId = id,
-            ScheduledTime = DateTime.Now.AddMinutes(12),
-            EstimatedTime = DateTime.Now.AddMinutes(15),
-            MinutesToArrival = 15
-        }
-    };
+            {
+                new ArrivalRealTime
+                {
+                    TripId = 101,
+                    LineId = 5,
+                    StationId = id,
+                    ScheduledTime = DateTime.Now.AddMinutes(4),
+                    EstimatedTime = DateTime.Now.AddMinutes(3),
+                    MinutesToArrival = 3
+                },
+                new ArrivalRealTime
+                {
+                    TripId = 102,
+                    LineId = 18,
+                    StationId = id,
+                    ScheduledTime = DateTime.Now.AddMinutes(12),
+                    EstimatedTime = DateTime.Now.AddMinutes(10),
+                    MinutesToArrival = 10
+                }
+            };
 
             return Ok(arrivals);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Station>> CreateStation([FromBody] Station newStation)
+        {
+            if (newStation == null)
+                return BadRequest();
+
+            _context.Stations.Add(newStation);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetAllStations), new { id = newStation.StationId }, newStation);
+        }
+
+
     }
 }

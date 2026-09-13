@@ -12,30 +12,43 @@ namespace NextBus.Mobile
             _apiService = new ApiService();
         }
 
-        private async void OnSearchRoutesClicked(object sender, EventArgs e)
+        private async void OnFindRouteClicked(object sender, EventArgs e)
         {
-            string origin = OriginEntry.Text;
-            string destination = DestinationEntry.Text;
-
-            if (string.IsNullOrWhiteSpace(origin) || string.IsNullOrWhiteSpace(destination))
-            {
-                await DisplayAlert("שגיאה", "אנא הזן מוצא ויעד", "אישור");
-                return;
-            }
-
             LoadingIndicator.IsVisible = true;
             LoadingIndicator.IsRunning = true;
 
-            var routes = await _apiService.SearchRoutesAsync(origin, destination);
-
-            RoutesCollectionView.ItemsSource = routes;
-
-            LoadingIndicator.IsRunning = false;
-            LoadingIndicator.IsVisible = false;
-
-            if (routes.Count == 0)
+            try
             {
-                await DisplayAlert("הודעה", "לא נמצאו מסלולים מתאימים", "אישור");
+                var fromCoords = OriginEntry.Text.Split(',');
+                var toCoords = DestinationEntry.Text.Split(',');
+
+                if (fromCoords.Length == 2 && toCoords.Length == 2 &&
+                    double.TryParse(fromCoords[0].Trim(), out double fromLat) &&
+                    double.TryParse(fromCoords[1].Trim(), out double fromLon) &&
+                    double.TryParse(toCoords[0].Trim(), out double toLat) &&
+                    double.TryParse(toCoords[1].Trim(), out double toLon))
+                {
+                    var routes = await _apiService.PlanRouteAsync(fromLat, fromLon, toLat, toLon);
+                    RoutesCollectionView.ItemsSource = routes;
+
+                    if (routes == null || routes.Count == 0)
+                    {
+                        await DisplayAlert("הודעה", "לא נמצאו מסלולים מתאימים עבור מיקומים אלו", "אישור");
+                    }
+                }
+                else
+                {
+                    await DisplayAlert("שגיאה", "פורמט הקואורדינטות אינו תקין (נדרש: רוחב, אורך)", "אישור");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("שגיאה", $"אירעה תקלה: {ex.Message}", "אישור");
+            }
+            finally
+            {
+                LoadingIndicator.IsRunning = false;
+                LoadingIndicator.IsVisible = false;
             }
         }
     }
