@@ -12,25 +12,102 @@ namespace NextBus.Mobile
         private double? _originLon;
         private double? _destLat;
         private double? _destLon;
+        private CancellationTokenSource? _originCts;
+        private CancellationTokenSource? _destCts;
 
         public RoutesPage()
         {
             InitializeComponent();
             _apiService = new ApiService();
             _geocodingService = new GeocodingService();
+
+            // חיבור אירועי ההקלדה ישירות בקוד כדי להבטיח זיהוי ב-Windows
+            OriginSearchEntry.TextChanged += OnOriginTextChanged;
+            DestinationSearchEntry.TextChanged += OnDestinationTextChanged;
+        }
+
+        private async void OnSearchOriginClicked(object sender, EventArgs e)
+        {
+            await TriggerSearch(OriginSearchEntry.Text, OriginSuggestionsView, OriginSuggestionsBorder);
+        }
+
+        private async void OnSearchDestClicked(object sender, EventArgs e)
+        {
+            await TriggerSearch(DestinationSearchEntry.Text, DestinationSuggestionsView, DestinationSuggestionsBorder);
         }
 
         private async void OnOriginTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(e.NewTextValue) || e.NewTextValue.Length < 3)
+            _originCts?.Cancel();
+            _originCts = new CancellationTokenSource();
+            var token = _originCts.Token;
+
+            var text = e.NewTextValue;
+            if (string.IsNullOrWhiteSpace(text) || text.Trim().Length < 2)
             {
-                OriginSuggestionsView.IsVisible = false;
+                OriginSuggestionsBorder.IsVisible = false;
                 return;
             }
 
-            var predictions = await _geocodingService.SearchPlacesAsync(e.NewTextValue);
-            OriginSuggestionsView.ItemsSource = predictions;
-            OriginSuggestionsView.IsVisible = predictions.Count > 0;
+            try
+            {
+                // ממתין 400ms - אם המשתמש ממשיך להקליד, הבקשה מתבטלת ולא נשלחת
+                await Task.Delay(400, token);
+
+                var predictions = await _geocodingService.SearchPlacesAsync(text, token);
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    OriginSuggestionsView.ItemsSource = predictions;
+                    OriginSuggestionsBorder.IsVisible = predictions.Count > 0;
+                });
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private async void OnDestinationTextChanged(object sender, TextChangedEventArgs e)
+        {
+            _destCts?.Cancel();
+            _destCts = new CancellationTokenSource();
+            var token = _destCts.Token;
+
+            var text = e.NewTextValue;
+            if (string.IsNullOrWhiteSpace(text) || text.Trim().Length < 2)
+            {
+                DestinationSuggestionsBorder.IsVisible = false;
+                return;
+            }
+
+            try
+            {
+                await Task.Delay(400, token);
+
+                var predictions = await _geocodingService.SearchPlacesAsync(text, token);
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    DestinationSuggestionsView.ItemsSource = predictions;
+                    DestinationSuggestionsBorder.IsVisible = predictions.Count > 0;
+                });
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private async Task TriggerSearch(string text, CollectionView view, Border border)
+        {
+            if (string.IsNullOrWhiteSpace(text) || text.Trim().Length < 2)
+            {
+                MainThread.BeginInvokeOnMainThread(() => border.IsVisible = false);
+                return;
+            }
+
+            var predictions = await _geocodingService.SearchPlacesAsync(text);
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                view.ItemsSource = predictions;
+                border.IsVisible = predictions != null && predictions.Count > 0;
+            });
         }
 
         private void OnOriginSuggestionSelected(object sender, SelectionChangedEventArgs e)
@@ -44,22 +121,9 @@ namespace NextBus.Mobile
                 OriginSearchEntry.Text = selected.DisplayName;
                 OriginSearchEntry.TextChanged += OnOriginTextChanged;
 
-                OriginSuggestionsView.IsVisible = false;
+                OriginSuggestionsBorder.IsVisible = false;
                 OriginSuggestionsView.SelectedItem = null;
             }
-        }
-
-        private async void OnDestinationTextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(e.NewTextValue) || e.NewTextValue.Length < 3)
-            {
-                DestinationSuggestionsView.IsVisible = false;
-                return;
-            }
-
-            var predictions = await _geocodingService.SearchPlacesAsync(e.NewTextValue);
-            DestinationSuggestionsView.ItemsSource = predictions;
-            DestinationSuggestionsView.IsVisible = predictions.Count > 0;
         }
 
         private void OnDestinationSuggestionSelected(object sender, SelectionChangedEventArgs e)
@@ -73,11 +137,12 @@ namespace NextBus.Mobile
                 DestinationSearchEntry.Text = selected.DisplayName;
                 DestinationSearchEntry.TextChanged += OnDestinationTextChanged;
 
-                DestinationSuggestionsView.IsVisible = false;
+                DestinationSuggestionsBorder.IsVisible = false;
                 DestinationSuggestionsView.SelectedItem = null;
             }
         }
 
+        
         private async void OnFindRouteClicked(object sender, EventArgs e)
         {
             if (_originLat == null || _originLon == null || _destLat == null || _destLon == null)

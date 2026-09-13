@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:NextBus.Mobile"
     Shell.FlyoutBehavior="Disabled"
     Title="NextBus">
+    
 
     <TabBar>
         <Tab Title="תחנות" Icon="dotnet_bot.png">
