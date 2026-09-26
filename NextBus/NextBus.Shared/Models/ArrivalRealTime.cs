@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NextBus.Shared.Models
 {
@@ -12,5 +10,11 @@ namespace NextBus.Shared.Models
         public DateTime ScheduledTime { get; set; }
         public DateTime EstimatedTime { get; set; }
         public int MinutesToArrival { get; set; }
+
+        public string LineNumber { get; set; } = string.Empty;
+        public string DestinationName { get; set; } = string.Empty;
+        public string Company { get; set; } = string.Empty;
+        public string ArrivalText { get; set; } = string.Empty;
+        public DateTime ExpectedArrivalTime { get; set; }
     }
 }

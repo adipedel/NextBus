@@ -1,72 +1,105 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="NextBus.Mobile.StationDetailsPage"
-             FlowDirection="RightToLeft">
+             x:Class="NextBus.Mobile.Views.StationDetailsPage"
+             BackgroundColor="#121212">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+    <Grid RowDefinitions="Auto, Auto, *" Padding="20,10">
 
-            <Label x:Name="StationTitleLabel"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   TextColor="#1E88E5"
-                   HorizontalOptions="Center" />
+        <!-- כותרת ראשית של התחנה -->
+        <Label x:Name="StationTitleLabel"
+               Grid.Row="0"
+               Text="פרטי תחנה"
+               TextColor="#A78BFA"
+               FontSize="26"
+               FontAttributes="Bold"
+               HorizontalOptions="End"
+               Margin="0,0,0,10"/>
 
-            <Label Text="זמני הגעה בזמן אמת:"
+        <!-- שורת סטטוס + מחוון רענון קל -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Margin="0,0,0,15">
+            <ActivityIndicator x:Name="LoadingSpinner"
+                               Grid.Column="0"
+                               IsRunning="False"
+                               IsVisible="False"
+                               Color="#38BDF8"
+                               WidthRequest="22"
+                               HeightRequest="22"/>
+
+            <Label Grid.Column="1"
+                   Text="זמני הגעה:"
+                   TextColor="White"
                    FontSize="16"
-                   FontAttributes="Bold" />
+                   FontAttributes="Bold"
+                   HorizontalOptions="End"
+                   VerticalOptions="Center"/>
+        </Grid>
 
-            <ActivityIndicator x:Name="LoadingIndicator"
-                               IsRunning="True"
-                               IsVisible="True"
-                               HorizontalOptions="Center" />
+        <!-- רשימת הקווים עם גלילה חלקה -->
+        <CollectionView x:Name="ArrivalsCollectionView"
+                        Grid.Row="2"
+                        SelectionMode="None">
 
-            <CollectionView x:Name="ArrivalsCollectionView"
-                            SelectionMode="None">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Margin="0,5"
-                               Padding="15"
-                               BorderColor="#E0E0E0"
-                               CornerRadius="10"
-                               HasShadow="True">
-                            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
-                                <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
-                                    <Label Text="קו" FontSize="18" FontAttributes="Bold" />
-                                    <Label Text="{Binding LineId}" FontSize="18" FontAttributes="Bold" TextColor="#1E88E5" />
-                                </HorizontalStackLayout>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
 
-                                <Label Grid.Row="1" Grid.Column="0"
-                                       Text="{Binding EstimatedTime, StringFormat='הגעה משוערת: {0:HH:mm}'}"
-                                       FontSize="13"
-                                       TextColor="#666666" />
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Stroke="#334155"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="#000000"
+                            Padding="16,12">
+                        <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
 
-                                <Frame Grid.RowSpan="2" Grid.Column="1"
-                                       BackgroundColor="#E3F2FD"
-                                       BorderColor="Transparent"
-                                       Padding="10,5"
-                                       CornerRadius="8"
-                                       VerticalOptions="Center">
-                                    <Label Text="{Binding MinutesToArrival, StringFormat='בעוד {0} דקות'}"
-                                           TextColor="#0D47A1"
-                                           FontAttributes="Bold"
-                                           FontSize="14" />
-                                </Frame>
-                            </Grid>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                            <!-- שעת הגעה משוערת + מספר קו -->
+                            <VerticalStackLayout Grid.Column="2" HorizontalOptions="End" Spacing="2">
+                                <Label Text="{Binding LineNumber, StringFormat='קו {0}'}"
+                                       TextColor="#38BDF8"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="End"/>
+                                <Label Text="{Binding ExpectedArrivalTime, StringFormat='הגעה משוערת: {0:HH:mm}'}"
+                                       TextColor="#94A3B8"
+                                       FontSize="12"
+                                       HorizontalOptions="End"/>
+                            </VerticalStackLayout>
 
-            <Label x:Name="EmptyLabel"
-                   Text="אין נתוני הגעה כרגע לתחנה זו"
-                   IsVisible="False"
-                   HorizontalOptions="Center"
-                   TextColor="#888888"
-                   Margin="0,20,0,0" />
+                            <!-- יעד הקו -->
+                            <Label Grid.Column="1"
+                                   Text="{Binding DestinationName}"
+                                   TextColor="#CBD5E1"
+                                   FontSize="14"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center"
+                                   Margin="0,0,20,0"
+                                   LineBreakMode="TailTruncation"/>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                            <!-- תגית זמן הגעה -->
+                            <Border Grid.Column="0"
+                                    BackgroundColor="#1E293B"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,6">
+                                <Label Text="{Binding ArrivalText}"
+                                       TextColor="#38BDF8"
+                                       FontAttributes="Bold"
+                                       FontSize="14"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <Label Text="אין נתוני הגעה כרגע לתחנה זו"
+                       TextColor="Gray"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       Margin="0,40,0,0"/>
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+    </Grid>
 
 </ContentPage>

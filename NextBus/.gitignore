@@ -1,0 +1,5 @@
+*.txt
+*.zip
+*.sqlite-wal
+*.sqlite-shm
+NextBus/NextBus.API/*.txt

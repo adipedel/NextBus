@@ -1,4 +1,5 @@
-﻿using NextBus.Shared.Models;
+﻿using NextBus.Mobile.Models;
+using NextBus.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
@@ -74,6 +75,20 @@ namespace NextBus.Mobile.Services
             {
                 Console.WriteLine($"Error planning route: {ex.Message}");
                 return new List<RouteSolution>();
+            }
+        }
+
+        public async Task<List<ArrivalRealTime>> GetRealtimeArrivalsAsync(int stopCode)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<List<ArrivalRealTime>>($"stations/{stopCode}/realtime");
+                return response ?? new List<ArrivalRealTime>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error fetching realtime: {ex.Message}");
+                return new List<ArrivalRealTime>();
             }
         }
     }

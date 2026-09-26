@@ -1,21 +1,24 @@
 ﻿using NextBus.Mobile.Services;
 using NextBus.Shared.Models;
+using NextBus.Mobile.Views;
 
 namespace NextBus.Mobile
 {
     public partial class MainPage : ContentPage
     {
         private readonly ApiService _apiService;
+        private readonly LocationService _locationService;
         private List<Station> _allStations = new();
 
-        // מיקום נוכחי לדוגמה (מרכז תל אביב) לצורך פיתוח
-        private const double UserLat = 32.0853;
-        private const double UserLon = 34.7818;
+        // מיקום ברירת מחדל (מרכז תל אביב) במקרה שאין הרשאה או GPS כבוי
+        private double _currentUserLat = 32.0853;
+        private double _currentUserLon = 34.7818;
 
         public MainPage()
         {
             InitializeComponent();
             _apiService = new ApiService();
+            _locationService = new LocationService();
         }
 
         protected override async void OnAppearing()
@@ -32,24 +35,32 @@ namespace NextBus.Mobile
             LoadingIndicator.IsVisible = true;
             LoadingIndicator.IsRunning = true;
 
-            _allStations = await _apiService.GetStationsAsync();
-
-            // חישוב מרחק המשתמש מכל תחנה
-            foreach (var station in _allStations)
+            // 1. שליפת מיקום GPS אמיתי של המכשיר
+            var location = await _locationService.GetCurrentLocationAsync();
+            if (location != null)
             {
-                station.DistanceInMeters = CalculateDistance(UserLat, UserLon, station.Latitude, station.Longitude);
+                _currentUserLat = location.Latitude;
+                _currentUserLon = location.Longitude;
             }
 
-            // הצגת תחנות קרובות ברדיוס של עד 500 מטר כברירת מחדל
+            // 2. קבלת התחנות מה-API
+            _allStations = await _apiService.GetStationsAsync();
+
+            // 3. חישוב מרחק המשתמש מכל תחנה לפי המיקום הנוכחי שנשלף
+            foreach (var station in _allStations)
+            {
+                station.DistanceInMeters = CalculateDistance(_currentUserLat, _currentUserLon, station.Latitude, station.Longitude);
+            }
+
+            // 4. הצגת תחנות קרובות (עד 600 מטר)
             var nearbyStations = _allStations
-                .Where(s => s.DistanceInMeters <= 500)
+                .Where(s => s.DistanceInMeters <= 600)
                 .OrderBy(s => s.DistanceInMeters)
                 .ToList();
 
-            // אם אין תחנות בטווח 500 מטר, מציגים את כל התחנות ממוינות לפי מרחק
             StationsCollectionView.ItemsSource = nearbyStations.Count > 0
                 ? nearbyStations
-                : _allStations.OrderBy(s => s.DistanceInMeters).ToList();
+                : _allStations.OrderBy(s => s.DistanceInMeters).Take(20).ToList();
 
             LoadingIndicator.IsRunning = false;
             LoadingIndicator.IsVisible = false;
@@ -61,21 +72,20 @@ namespace NextBus.Mobile
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                // אם שורת החיפוש ריקה, חוזרים לתחנות הקרובות ביותר
                 var nearby = _allStations
-                    .Where(s => s.DistanceInMeters <= 500)
+                    .Where(s => s.DistanceInMeters <= 600)
                     .OrderBy(s => s.DistanceInMeters)
                     .ToList();
 
                 StationsCollectionView.ItemsSource = nearby.Count > 0
                     ? nearby
-                    : _allStations.OrderBy(s => s.DistanceInMeters).ToList();
+                    : _allStations.OrderBy(s => s.DistanceInMeters).Take(20).ToList();
                 return;
             }
 
             // סינון תוך כדי הקלדה לפי שם או קוד תחנה
             var filtered = _allStations
-                .Where(s => s.Name.ToLower().Contains(query) || s.StationCode.ToString().Contains(query))
+                .Where(s => s.Name.ToLower().Contains(query) || (s.StationCode != null && s.StationCode.Contains(query)))
                 .OrderBy(s => s.DistanceInMeters)
                 .ToList();
 
@@ -92,7 +102,6 @@ namespace NextBus.Mobile
             await Navigation.PushAsync(new StationDetailsPage(selectedStation));
         }
 
-        // חישוב מרחק בקירוב במטרים לפי נוסחת Haversine
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
             double r = 6371e3; // רדיוס כדור הארץ במטרים

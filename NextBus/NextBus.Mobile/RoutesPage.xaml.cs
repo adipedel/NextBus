@@ -7,12 +7,14 @@ namespace NextBus.Mobile
     {
         private readonly ApiService _apiService;
         private readonly GeocodingService _geocodingService;
+        private readonly LocationService _locationService;
 
         private double? _originLat;
         private double? _originLon;
         private double? _destLat;
         private double? _destLon;
         private CancellationTokenSource? _originCts;
+        private readonly RouteFactory _routeFactory;
         private CancellationTokenSource? _destCts;
 
         public RoutesPage()
@@ -20,10 +22,38 @@ namespace NextBus.Mobile
             InitializeComponent();
             _apiService = new ApiService();
             _geocodingService = new GeocodingService();
+            _locationService = new LocationService();
 
             // חיבור אירועי ההקלדה ישירות בקוד כדי להבטיח זיהוי ב-Windows
             OriginSearchEntry.TextChanged += OnOriginTextChanged;
             DestinationSearchEntry.TextChanged += OnDestinationTextChanged;
+        }
+
+        private async void OnUseCurrentLocationClicked(object sender, EventArgs e)
+        {
+            OriginSearchEntry.TextChanged -= OnOriginTextChanged;
+            OriginSearchEntry.Text = "מאתר מיקום נוכחי...";
+            OriginSearchEntry.IsEnabled = false;
+
+            var location = await _locationService.GetCurrentLocationAsync();
+
+            OriginSearchEntry.IsEnabled = true;
+
+            if (location != null)
+            {
+                _originLat = location.Latitude;
+                _originLon = location.Longitude;
+
+                OriginSearchEntry.Text = "המיקום שלי";
+                OriginSuggestionsBorder.IsVisible = false;
+            }
+            else
+            {
+                OriginSearchEntry.Text = string.Empty;
+                await DisplayAlert("שגיאת מיקום", "לא הצלחנו לקבל את מיקומך. ודאי שה-GPS פעיל ושאושרו הרשאות מיקום במכשיר.", "אישור");
+            }
+
+            OriginSearchEntry.TextChanged += OnOriginTextChanged;
         }
 
         private async void OnSearchOriginClicked(object sender, EventArgs e)
@@ -142,12 +172,11 @@ namespace NextBus.Mobile
             }
         }
 
-        
         private async void OnFindRouteClicked(object sender, EventArgs e)
         {
             if (_originLat == null || _originLon == null || _destLat == null || _destLon == null)
             {
-                await DisplayAlert("חסר מידע", "נא לבחור כתובת מוצא ויעד מתוך רשימת ההצעות", "אישור");
+                await DisplayAlert("חסר מידע", "נא לבחור כתובת מוצא ויעד מתוך רשימת ההצעות או לבחור במיקום הנוכחי", "אישור");
                 return;
             }
 
