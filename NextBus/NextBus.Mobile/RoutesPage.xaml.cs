@@ -31,29 +31,41 @@ namespace NextBus.Mobile
 
         private async void OnUseCurrentLocationClicked(object sender, EventArgs e)
         {
-            OriginSearchEntry.TextChanged -= OnOriginTextChanged;
-            OriginSearchEntry.Text = "מאתר מיקום נוכחי...";
-            OriginSearchEntry.IsEnabled = false;
+            // קואורדינטות ברירת מחדל: עזריאלי /   
+            const double fallbackLat = 32.0754;
+            const double fallbackLon = 34.7915;
+            const string fallbackName = "תל אביב - עזריאלי (ברירת מחדל)";
 
-            var location = await _locationService.GetCurrentLocationAsync();
-
-            OriginSearchEntry.IsEnabled = true;
-
-            if (location != null)
+            try
             {
-                _originLat = location.Latitude;
-                _originLon = location.Longitude;
+                LoadingIndicator.IsRunning = true;
+                LoadingIndicator.IsVisible = true;
 
-                OriginSearchEntry.Text = "המיקום שלי";
-                OriginSuggestionsBorder.IsVisible = false;
+                var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(5));
+                var location = await Geolocation.Default.GetLocationAsync(request);
+
+                if (location != null)
+                {
+                    _originLat = location.Latitude;
+                    _originLon = location.Longitude;
+                    OriginSearchEntry.Text = "המיקום הנוכחי שלי";
+                    return;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                OriginSearchEntry.Text = string.Empty;
-                await DisplayAlert("שגיאת מיקום", "לא הצלחנו לקבל את מיקומך. ודאי שה-GPS פעיל ושאושרו הרשאות מיקום במכשיר.", "אישור");
+                System.Diagnostics.Debug.WriteLine($"GPS Error: {ex.Message}");
+            }
+            finally
+            {
+                LoadingIndicator.IsRunning = false;
+                LoadingIndicator.IsVisible = false;
             }
 
-            OriginSearchEntry.TextChanged += OnOriginTextChanged;
+            // אם ה-GPS לא הצליח לקבל מיקום או נזרקה שגיאה - נשתמש בברירת המחדל
+            _originLat = fallbackLat;
+            _originLon = fallbackLon;
+            OriginSearchEntry.Text = fallbackName;
         }
 
         private async void OnSearchOriginClicked(object sender, EventArgs e)
@@ -202,6 +214,50 @@ namespace NextBus.Mobile
             {
                 LoadingIndicator.IsRunning = false;
                 LoadingIndicator.IsVisible = false;
+            }
+        }
+
+        private async void OnRouteSelected(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedRoute = e.CurrentSelection.FirstOrDefault() as NextBus.Shared.Models.RouteSolution;
+            if (selectedRoute == null) return;
+
+            // איפוס הבחירה כדי שאפשר יהיה ללחוץ שוב על אותו כרטיס
+            ((CollectionView)sender).SelectedItem = null;
+
+            if (_originLat.HasValue && _originLon.HasValue && _destLat.HasValue && _destLon.HasValue)
+            {
+                await Navigation.PushAsync(new Views.RouteMapPage(
+                    selectedRoute,
+                    _originLat.Value,
+                    _originLon.Value,
+                    _destLat.Value,
+                    _destLon.Value));
+            }
+            else
+            {
+                await DisplayAlert("שגיאה", "חסרות קואורדינטות של המוצא או היעד לצורך הצגת מפה.", "אישור");
+            }
+        }
+
+        private async void OnRouteTapped(object sender, TappedEventArgs e)
+        {
+            // האלמנט עליו לחצו הוא ה-Border, וה-BindingContext שלו הוא ה-RouteSolution
+            if (sender is VisualElement element && element.BindingContext is NextBus.Shared.Models.RouteSolution selectedRoute)
+            {
+                if (_originLat.HasValue && _originLon.HasValue && _destLat.HasValue && _destLon.HasValue)
+                {
+                    await Navigation.PushAsync(new Views.RouteMapPage(
+                        selectedRoute,
+                        _originLat.Value,
+                        _originLon.Value,
+                        _destLat.Value,
+                        _destLon.Value));
+                }
+                else
+                {
+                    await DisplayAlert("שגיאה", "חסרות קואורדינטות של המוצא או היעד לצורך הצגת מפה.", "אישור");
+                }
             }
         }
     }

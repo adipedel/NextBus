@@ -2,6 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="NextBus.Mobile.RoutesPage"
+             BackgroundColor="#121212"
+             Shell.NavBarIsVisible="False"
              FlowDirection="RightToLeft">
 
     <Grid RowDefinitions="Auto, Auto, Auto, *" Padding="15,10,15,15">
@@ -13,20 +15,20 @@
             <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
                     <Entry x:Name="OriginSearchEntry"
-                       Grid.Column="0"
-                       Placeholder="נקודת מוצא (למשל: אבן גבירול 3)"
-                       TextColor="White"
-                       PlaceholderColor="#94A3B8"/>
+                           Grid.Column="0"
+                           Placeholder="נקודת מוצא (למשל: אבן גבירול 3)"
+                           TextColor="White"
+                           PlaceholderColor="#94A3B8"/>
 
-                            <Button Grid.Column="1"
-                        Text="המיקום שלי"
-                        Clicked="OnUseCurrentLocationClicked"
-                        BackgroundColor="#1E293B"
-                        TextColor="#38BDF8"
-                        FontAttributes="Bold"
-                        CornerRadius="8"
-                        Margin="8,0,0,0"
-                        Padding="12,0"/>    
+                    <Button Grid.Column="1"
+                            Text="המיקום שלי"
+                            Clicked="OnUseCurrentLocationClicked"
+                            BackgroundColor="#1E293B"
+                            TextColor="#38BDF8"
+                            FontAttributes="Bold"
+                            CornerRadius="8"
+                            Margin="8,0,0,0"
+                            Padding="12,0"/>
                 </Grid>
 
                 <Border x:Name="OriginSuggestionsBorder"
@@ -58,7 +60,9 @@
                 <Grid ColumnDefinitions="*, Auto">
                     <Entry x:Name="DestinationSearchEntry"
                            Grid.Column="0"
-                           Placeholder="לאן נוסעים? (למשל: סבידור)" />
+                           Placeholder="לאן נוסעים? (למשל: סבידור)"
+                           TextColor="White"
+                           PlaceholderColor="#94A3B8"/>
                     <Button x:Name="SearchDestBtn"
                             Grid.Column="1"
                             Text="🔍"
@@ -111,12 +115,17 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border Stroke="#334155"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 14"
-                BackgroundColor="#111827"
-                Margin="0,0,0,16"
-                Padding="18,16"
-                FlowDirection="RightToLeft">
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="#111827"
+                            Margin="0,0,0,16"
+                            Padding="18,16"
+                            FlowDirection="RightToLeft">
+
+                        <!-- זיהוי לחיצה לפתיחת המפה -->
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRouteTapped" />
+                        </Border.GestureRecognizers>
 
                         <VerticalStackLayout Spacing="14">
 
@@ -125,25 +134,25 @@
 
                                 <!-- צד ימין: מספרי הקווים -->
                                 <HorizontalStackLayout Grid.Column="0" 
-                                           HorizontalOptions="Start" 
-                                           VerticalOptions="Center" 
-                                           Spacing="8">
+                                                       HorizontalOptions="Start" 
+                                                       VerticalOptions="Center" 
+                                                       Spacing="8">
 
                                     <!-- אם זה קו ישיר -->
                                     <Border BackgroundColor="#0284C7"
-                                StrokeShape="RoundRectangle 8"
-                                Padding="12,5"
-                                IsVisible="{Binding IsDirect}">
+                                            StrokeShape="RoundRectangle 8"
+                                            Padding="12,5"
+                                            IsVisible="{Binding IsDirect}">
                                         <Label Text="{Binding LineNumber, StringFormat='קו {0}'}"
-                                   TextColor="White"
-                                   FontAttributes="Bold"
-                                   FontSize="16"/>
+                                               TextColor="White"
+                                               FontAttributes="Bold"
+                                               FontSize="16"/>
                                     </Border>
 
                                     <!-- אם זה מסלול עם החלפה -->
                                     <HorizontalStackLayout Spacing="6" 
-                                               IsVisible="{Binding IsTransfer}" 
-                                               VerticalOptions="Center">
+                                                           IsVisible="{Binding IsTransfer}" 
+                                                           VerticalOptions="Center">
                                         <Border BackgroundColor="#2563EB" StrokeShape="RoundRectangle 8" Padding="10,5">
                                             <Label Text="{Binding FirstLineNumber, StringFormat='קו {0}'}" TextColor="White" FontAttributes="Bold" FontSize="14"/>
                                         </Border>
@@ -156,31 +165,31 @@
 
                                 <!-- צד שמאל: סה"כ זמן מסע -->
                                 <Border Grid.Column="1"
-                            BackgroundColor="#1E293B"
-                            StrokeShape="RoundRectangle 8"
-                            Padding="12,5"
-                            HorizontalOptions="End"
-                            VerticalOptions="Center">
+                                        BackgroundColor="#1E293B"
+                                        StrokeShape="RoundRectangle 8"
+                                        Padding="12,5"
+                                        HorizontalOptions="End"
+                                        VerticalOptions="Center">
                                     <Label Text="{Binding TotalDurationMinutes, StringFormat='סה״כ {0} דק׳'}"
-                               TextColor="#38BDF8"
-                               FontAttributes="Bold"
-                               FontSize="14"/>
+                                           TextColor="#38BDF8"
+                                           FontAttributes="Bold"
+                                           FontSize="14"/>
                                 </Border>
                             </Grid>
 
                             <BoxView HeightRequest="1" Color="#1F2937" HorizontalOptions="Fill"/>
 
-                            <!-- ציר זמן המסלול - מיושר כולו לימין -->
+                            <!-- ציר זמן המסלול - מיושר לימין -->
                             <VerticalStackLayout Spacing="12" FlowDirection="RightToLeft">
 
                                 <!-- 1. הליכה לתחנה -->
                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
                                     <Label Text="{Binding WalkToStationMinutes, StringFormat='הליכה של {0} דק׳ לתחנה'}" 
-                               TextColor="#94A3B8" 
-                               FontSize="13"/>
+                                           TextColor="#94A3B8" 
+                                           FontSize="13"/>
                                     <Label Text="{Binding WalkToStationMeters, StringFormat='({0} מ׳)'}" 
-                               TextColor="#64748B" 
-                               FontSize="13"/>
+                                           TextColor="#64748B" 
+                                           FontSize="13"/>
                                 </HorizontalStackLayout>
 
                                 <!-- 2. עליה לקו ראשון -->
@@ -188,41 +197,63 @@
                                     <HorizontalStackLayout Spacing="6">
                                         <Label Text="עליה בתחנה:" TextColor="#38BDF8" FontAttributes="Bold" FontSize="14"/>
                                         <Label Text="{Binding OriginStationName}" 
-                                   TextColor="#F8FAFC" 
-                                   FontAttributes="Bold" 
-                                   FontSize="14"/>
+                                               TextColor="#F8FAFC" 
+                                               FontAttributes="Bold" 
+                                               FontSize="14"/>
                                     </HorizontalStackLayout>
+
+                                    <!-- תגית זמני הגעה של הקו לתחנת העלייה -->
+                                    <!-- תגית זמני הגעה של הקו -->
+                                    <Border BackgroundColor="#0F291E"
+                                        Stroke="#166534"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 8"
+                                        Padding="10,6"
+                                        HorizontalOptions="Start">  
+                                        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                            <Label Text="{Binding NextArrivalMinutes, StringFormat='הקו הקרוב מגיע בעוד {0} דק׳'}"
+                                                TextColor="#4ADE80"
+                                                FontSize="13"
+                                                FontAttributes="Bold"
+                                                VerticalOptions="Center"/>   
+
+                                            <Label Text="{Binding FollowingArrivalMinutes, StringFormat='(הקו הבא מגיע בעוד {0} דק׳)'}"
+                                               TextColor="#94A3B8"
+                                               FontSize="12"
+                                               VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                    </Border>
 
                                     <!-- מספר תחנות נסיעה -->
                                     <Label Text="{Binding FirstLegStops, StringFormat='  נסיעה של {0} תחנות'}"
-                               TextColor="#64748B" 
-                               FontSize="15"
-                               Margin="20,0,0,0"
-                               IsVisible="{Binding IsTransfer}"/>
+                                           TextColor="#64748B" 
+                                           FontSize="15"
+                                           Margin="20,0,0,0"
+                                           IsVisible="{Binding IsTransfer}"/>
                                     <Label Text="{Binding StopsCount, StringFormat='  נסיעה של {0} תחנות'}"
-                               TextColor="#64748B" 
-                               FontSize="15"
-                               Margin="20,0,0,0"
-                               IsVisible="{Binding IsDirect}"/>
+                                           TextColor="#64748B" 
+                                           FontSize="15"
+                                           Margin="20,0,0,0"
+                                           IsVisible="{Binding IsDirect}"/>
                                 </VerticalStackLayout>
 
                                 <!-- 3. תחנת החלפה (אם קיימת) -->
                                 <Border BackgroundColor="#1E1B4B"
-                            Stroke="#4338CA"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 8"
-                            Padding="12,8"
-                            HorizontalOptions="Fill"
-                            IsVisible="{Binding IsTransfer}">
+                                        Stroke="#4338CA"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 8"
+                                        Padding="12,8"
+                                        HorizontalOptions="Fill"
+                                        IsVisible="{Binding IsTransfer}">
                                     <VerticalStackLayout Spacing="3">
                                         <HorizontalStackLayout Spacing="6">
                                             <Label Text="החלפה בתחנה:" TextColor="#A5B4FC" FontAttributes="Bold" FontSize="13"/>
                                             <Label Text="{Binding TransferStationName}" TextColor="#E0E7FF" FontAttributes="Bold" FontSize="13"/>
                                         </HorizontalStackLayout>
                                         <Label Text="{Binding SecondLegStops, StringFormat='  עולים על הקו הבא ל-{0} תחנות'}"
-                                   TextColor="#C7D2FE"
-                                   FontSize="12"
-                                   Margin="20,0,0,0"/>
+                                               TextColor="#C7D2FE"
+                                               FontSize="12"
+                                               Margin="20,0,0,0"/>
                                     </VerticalStackLayout>
                                 </Border>
 
@@ -230,19 +261,19 @@
                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
                                     <Label Text="ירידה בתחנה:" TextColor="#4ADE80" FontAttributes="Bold" FontSize="14"/>
                                     <Label Text="{Binding DestinationStationName}" 
-                               TextColor="#F8FAFC" 
-                               FontAttributes="Bold" 
-                               FontSize="14"/>
+                                           TextColor="#F8FAFC" 
+                                           FontAttributes="Bold" 
+                                           FontSize="14"/>
                                 </HorizontalStackLayout>
 
                                 <!-- 5. הליכה ליעד סופי -->
                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
                                     <Label Text="{Binding WalkFromStationMinutes, StringFormat='הליכה של {0} דק׳ ליעד'}" 
-                               TextColor="#94A3B8" 
-                               FontSize="13"/>
+                                           TextColor="#94A3B8" 
+                                           FontSize="13"/>
                                     <Label Text="{Binding WalkFromStationMeters, StringFormat='({0} מ׳)'}" 
-                               TextColor="#64748B" 
-                               FontSize="13"/>
+                                           TextColor="#64748B" 
+                                           FontSize="13"/>
                                 </HorizontalStackLayout>
 
                             </VerticalStackLayout>
