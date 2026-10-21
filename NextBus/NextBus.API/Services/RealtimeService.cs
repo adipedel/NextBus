@@ -69,7 +69,6 @@ namespace NextBus.API.Services
                     MinutesToArrival = arrivalInMinutes,
                     ArrivalText = arrivalInMinutes <= 1 ? "מגיע כעת" : $"בעוד {arrivalInMinutes} דקות",
                     ScheduledTime = now.AddMinutes(arrivalInMinutes),
-                    EstimatedTime = now.AddMinutes(arrivalInMinutes),
                     ExpectedArrivalTime = now.AddMinutes(arrivalInMinutes)
                 });
             }

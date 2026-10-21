@@ -8,7 +8,6 @@ namespace NextBus.Shared.Models
         public int LineId { get; set; }
         public int StationId { get; set; }
         public DateTime ScheduledTime { get; set; }
-        public DateTime EstimatedTime { get; set; }
         public int MinutesToArrival { get; set; }
 
         public string LineNumber { get; set; } = string.Empty;

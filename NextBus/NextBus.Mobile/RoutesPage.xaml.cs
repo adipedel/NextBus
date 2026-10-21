@@ -48,7 +48,7 @@ namespace NextBus.Mobile
                 {
                     _originLat = location.Latitude;
                     _originLon = location.Longitude;
-                    OriginSearchEntry.Text = "המיקום הנוכחי שלי";
+                    OriginSearchEntry.Text = "מיקום נוכחי";
                     return;
                 }
             }
