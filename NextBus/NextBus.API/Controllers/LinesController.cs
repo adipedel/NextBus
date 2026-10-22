@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NextBus.API.Data;
 using NextBus.Shared.Models;
 
 namespace NextBus.API.Controllers
@@ -8,42 +10,34 @@ namespace NextBus.API.Controllers
     [ApiController]
     public class LinesController : ControllerBase
     {
-        private static readonly List<Line> MockLines = new List<Line>
+        private readonly AppDbContext _context;
+
+        public LinesController(AppDbContext context)
         {
-            new Line
-            {
-                LineId = 1,
-                LineNumber = "1",
-                Company = "דן",
-                Origin = "תחנה מרכזית",
-                Destination = "עתידים"
-            },
-            new Line
-            {
-                LineId = 2,
-                LineNumber = "25",
-                Company = "קווים",
-                Origin = "אוניברסיטה",
-                Destination = "רידינג"
-            }
-        };
+            _context = context;
+        }
 
         // GET: api/lines
         [HttpGet]
-        public ActionResult<IEnumerable<Line>> GetAllLines()
+        public async Task<ActionResult<IEnumerable<Line>>> GetAllLines()
         {
-            return Ok(MockLines);
+            var lines = await _context.Lines.ToListAsync();
+            return Ok(lines);
         }
 
         // GET: api/lines/1
         [HttpGet("{id}")]
-        public ActionResult<Line> GetLineById(int id)
+        public async Task<ActionResult<Line>> GetLineById(int id)
         {
-            var line = MockLines.FirstOrDefault(l => l.LineId == id);
+            var line = await _context.Lines
+                .Include(l => l.Stops)
+                .FirstOrDefaultAsync(l => l.LineId == id);
+
             if (line == null)
             {
                 return NotFound(new { Message = "Line not found" });
             }
+
             return Ok(line);
         }
     }

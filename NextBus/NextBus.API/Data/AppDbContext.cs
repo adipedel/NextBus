@@ -17,11 +17,9 @@ namespace NextBus.API.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // אינדקס לשליפה מהירה לפי קוד תחנה
             modelBuilder.Entity<Station>()
                 .HasIndex(s => s.StationCode);
 
-            // אינדקסים קריטיים לשליפת קווים לפי תחנה ולהפך
             modelBuilder.Entity<LineStop>()
                 .HasIndex(ls => ls.StationId);
 

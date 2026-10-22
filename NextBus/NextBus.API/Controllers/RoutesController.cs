@@ -56,7 +56,7 @@ namespace NextBus.API.Controllers
             var origIds = originStations.Select(o => o.Station.StationId).ToList();
             var destIds = destStations.Select(d => d.Station.StationId).ToList();
 
-            // 1. קווים ישירים (Direct Routes)
+            // Direct Routes
             var directMatches = await (from origStop in _context.LineStops
                                        join destStop in _context.LineStops on origStop.LineId equals destStop.LineId
                                        join line in _context.Lines on origStop.LineId equals line.LineId
@@ -75,7 +75,6 @@ namespace NextBus.API.Controllers
 
             var solutions = new List<RouteSolution>();
 
-            // טיפול בקווים ישירים
             foreach (var m in directMatches)
             {
                 var orig = originStations.First(o => o.Station.StationId == m.OrigStationId);
@@ -85,7 +84,6 @@ namespace NextBus.API.Controllers
                 int walkFromMins = (int)Math.Ceiling(dest.Distance / 80.0);
                 int rideMins = m.StopsCount * 2 + 2;
 
-                // 1. חישוב זמני ההגעה לתחנת העלייה (האוטובוס הקרוב והבא אחריו)
                 var (nextMin, followingMin) = await GetUpcomingArrivalsMinutes(m.Line.LineId, orig.Station.StationId);
 
                 solutions.Add(new RouteSolution
@@ -93,14 +91,12 @@ namespace NextBus.API.Controllers
                     LineNumber = m.Line.LineNumber,
                     Company = m.Line.Company,
 
-                    // תחנת עלייה (מוצא)
                     OriginStationName = orig.Station.Name,
                     OriginStationLat = orig.Station.Latitude,
                     OriginStationLon = orig.Station.Longitude,
                     WalkToStationMeters = Math.Round(orig.Distance),
                     WalkToStationMinutes = walkToMins,
 
-                    // תחנת ירידה (יעד)
                     DestinationStationName = dest.Station.Name,
                     DestinationStationLat = dest.Station.Latitude,
                     DestinationStationLon = dest.Station.Longitude,
@@ -112,13 +108,11 @@ namespace NextBus.API.Controllers
                     IsDirect = true,
                     IsTransfer = false,
 
-                    // 2. השמת זמני ההגעה
                     NextArrivalMinutes = nextMin,
                     FollowingArrivalMinutes = followingMin
                 });
             }
 
-            // אם נמצאו קווים ישירים, מחזירים אותם מיד
             if (solutions.Any())
             {
                 var topDirect = solutions
@@ -131,7 +125,7 @@ namespace NextBus.API.Controllers
                 return Ok(topDirect);
             }
 
-            // 2. מסלולים עם החלפה אחת (Transfer)
+            //Transfer
             var transferMatches = await (from s1 in _context.LineStops
                                          join t1 in _context.LineStops on s1.LineId equals t1.LineId
                                          join t2 in _context.LineStops on t1.StationId equals t2.StationId
@@ -159,8 +153,6 @@ namespace NextBus.API.Controllers
             if (transferMatches.Any())
             {
                 var transferStationIds = transferMatches.Select(t => t.TransferStationId).Distinct().ToList();
-
-                // שליפת כל אובייקט התחנה כדי לקבל גם קואורדינטות
                 var transferStations = await _context.Stations
                     .Where(s => transferStationIds.Contains(s.StationId))
                     .ToDictionaryAsync(s => s.StationId, s => s);
@@ -183,21 +175,18 @@ namespace NextBus.API.Controllers
                         SecondLineNumber = t.Line2.LineNumber,
                         Company = $"{t.Line1.Company} / {t.Line2.Company}",
 
-                        // מוצא
                         OriginStationName = orig.Station.Name,
                         OriginStationLat = orig.Station.Latitude,
                         OriginStationLon = orig.Station.Longitude,
                         WalkToStationMeters = Math.Round(orig.Distance),
                         WalkToStationMinutes = walkToMins,
 
-                        // החלפה
                         TransferStationName = transferStation?.Name ?? "תחנת מעבר",
                         TransferStationLat = transferStation?.Latitude,
                         TransferStationLon = transferStation?.Longitude,
                         FirstLegStops = t.Stops1,
                         SecondLegStops = t.Stops2,
 
-                        // יעד
                         DestinationStationName = dest.Station.Name,
                         DestinationStationLat = dest.Station.Latitude,
                         DestinationStationLon = dest.Station.Longitude,
@@ -234,7 +223,6 @@ namespace NextBus.API.Controllers
 
         private Task<(int? next, int? following)> GetUpcomingArrivalsMinutes(int lineId, int stationId)
         {
-            // חישוב זמן הגעה בדקות לקו הקרוב והבא אחריו
             int seed = (lineId * 17 + stationId + DateTime.Now.Minute) % 12;
             int next = Math.Max(2, seed);
             int following = next + 14;

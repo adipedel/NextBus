@@ -13,13 +13,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RealtimeService>();
 
-// רישום SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=nextbus.db"));
 
 var app = builder.Build();
 
-// אתחול מסד נתונים וטעינה
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

@@ -34,7 +34,6 @@ namespace NextBus.Mobile.Views
 
             await FetchArrivalsAsync();
 
-            // רענון אוטומטי כל 20 שניות
             _refreshTimer = Dispatcher.CreateTimer();
             _refreshTimer.Interval = TimeSpan.FromSeconds(20);
             _refreshTimer.Tick += async (s, e) => await FetchArrivalsAsync();
@@ -52,7 +51,6 @@ namespace NextBus.Mobile.Views
         {
             if (string.IsNullOrWhiteSpace(_stopCode)) return;
 
-            // הפעלת חיווי טעינה עדין
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 LoadingSpinner.IsVisible = true;
@@ -87,7 +85,6 @@ namespace NextBus.Mobile.Views
             }
             finally
             {
-                // כיבוי והעלמת הגלגל ב-UI Thread
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     LoadingSpinner.IsRunning = false;

@@ -17,7 +17,6 @@ namespace NextBus.API.Services
         {
             string cleanCode = stopCode?.Trim() ?? "";
 
-            // 1. איתור התחנה ישירות לפי המחרוזת
             var station = await _context.Stations
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.StationCode == cleanCode);
@@ -27,7 +26,6 @@ namespace NextBus.API.Services
                 return new List<ArrivalRealTime>();
             }
 
-            // 2. שליפת כל הקווים שעוצרים בתחנה זו
             var lines = await (from ls in _context.LineStops
                                join l in _context.Lines on ls.LineId equals l.LineId
                                where ls.StationId == station.StationId

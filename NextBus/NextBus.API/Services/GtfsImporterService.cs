@@ -10,7 +10,7 @@ namespace NextBus.API.Services
         private readonly AppDbContext _context;
         private readonly ILogger<GtfsImporterService> _logger;
 
-        // טווח גיאוגרפי: תל אביב וסביבתה
+        //Tel Aviv bounding box (approximate)
         private const double MinLat = 32.00;
         private const double MaxLat = 32.17;
         private const double MinLon = 34.72;
@@ -41,7 +41,6 @@ namespace NextBus.API.Services
                 return;
             }
 
-            // 1. קריאת חברות מפעילות (agency.txt)
             var agencyMap = new Dictionary<string, string>();
             if (File.Exists(agencyFile))
             {
@@ -56,7 +55,7 @@ namespace NextBus.API.Services
                 }
             }
 
-            // 2. טעינת תחנות תל אביב מתוך stops.txt
+            // 1. Reading Tel Aviv stations from stops.txt
             _logger.LogInformation("Step 1/4: Reading Tel Aviv stations from stops.txt...");
             var stationsToAdd = new List<Station>();
             var stopIdToStation = new Dictionary<string, Station>();
@@ -99,7 +98,7 @@ namespace NextBus.API.Services
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Saved {stationsToAdd.Count} stations.");
 
-            // 3. סריקת stop_times.txt למציאת trip_ids שעוצרים בתחנות אלו
+            // 2. scanning stop_times.txt to find trip_ids in the relevant stops, and mapping them to routes via trips.txt
             _logger.LogInformation("Step 2/4: Finding relevant trips in stop_times.txt...");
             var targetStopIds = stopIdToStation.Keys.ToHashSet();
             var relevantTripIds = new HashSet<string>();
@@ -131,7 +130,7 @@ namespace NextBus.API.Services
                 }
             }
 
-            // 4. מיפוי Trip -> Route מתוך trips.txt
+            // 3. Mapping trips to routes from trips.txt
             _logger.LogInformation("Step 3/4: Mapping trips to routes from trips.txt...");
             var tripToRouteMap = new Dictionary<string, string>();
             var relevantRouteIds = new HashSet<string>();
@@ -158,7 +157,7 @@ namespace NextBus.API.Services
                 }
             }
 
-            // 5. טעינת הקווים האמיתיים מתוך routes.txt
+            // 4. Loading line definitions from routes.txt
             _logger.LogInformation("Step 4/4: Loading real line definitions from routes.txt...");
             var routeIdToEntity = new Dictionary<string, Line>();
             var linesToAdd = new List<Line>();
@@ -209,7 +208,7 @@ namespace NextBus.API.Services
             await _context.Lines.AddRangeAsync(linesToAdd);
             await _context.SaveChangesAsync();
 
-            // 6. שמירת הקישורים ב-LineStops
+            // Creating LineStop relationships based on the raw stop times and the mappings we've built
             var lineStopsToAdd = new List<LineStop>();
             var seenLinks = new HashSet<string>();
 

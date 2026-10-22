@@ -8,7 +8,7 @@
 
     <Grid RowDefinitions="Auto, Auto, *" Padding="20,10" FlowDirection="RightToLeft">
 
-        <!-- כותרת ראשית של התחנה -->
+        <!-- station title -->
         <Label x:Name="StationTitleLabel"
                Grid.Row="0"
                Text="פרטי תחנה"
@@ -18,7 +18,7 @@
                HorizontalOptions="Start"
                Margin="0,0,0,10"/>
 
-        <!-- שורת סטטוס + מחוון רענון -->
+        <!-- station information -->
         <HorizontalStackLayout Grid.Row="1" Spacing="8" Margin="0,0,0,15" HorizontalOptions="Start">
             <Label Text="זמני הגעה:"
                    TextColor="White"
@@ -35,7 +35,7 @@
                                VerticalOptions="Center"/>
         </HorizontalStackLayout>
 
-        <!-- רשימת הקווים -->
+        <!--  lines list -->
         <CollectionView x:Name="ArrivalsCollectionView"
                         Grid.Row="2"
                         SelectionMode="None">
@@ -55,7 +55,7 @@
 
                         <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
 
-                            <!-- צד ימין: מספר קו + שעת הגעה משוערת -->
+                            <!-- line number and arrival time -->
                             <VerticalStackLayout Grid.Column="0" HorizontalOptions="Start" Spacing="2">
                                 <Label Text="{Binding LineNumber, StringFormat='קו {0}'}"
                                        TextColor="#38BDF8"
@@ -68,7 +68,7 @@
                                        HorizontalOptions="Start"/>
                             </VerticalStackLayout>
 
-                            <!-- מרכז: יעד הקו (מיושר לימין) -->
+                            <!--line destination-->
                             <Label Grid.Column="1"
                                    Text="{Binding DestinationName}"
                                    TextColor="#CBD5E1"
@@ -78,7 +78,7 @@
                                    Margin="16,0,16,0"
                                    LineBreakMode="TailTruncation"/>
 
-                            <!-- צד שמאל: תגית זמן הגעה -->
+                            <!-- arrival time -->
                             <Border Grid.Column="2"
                                     BackgroundColor="#1E293B"
                                     StrokeShape="RoundRectangle 8"

@@ -37,7 +37,6 @@ namespace NextBus.Mobile.Models
 
     public class PhotonGeometry
     {
-        // ב-GeoJSON הקואורדינטות מגיעות בסדר [Longitude, Latitude]
         [JsonPropertyName("coordinates")]
         public List<double> Coordinates { get; set; } = new();
     }

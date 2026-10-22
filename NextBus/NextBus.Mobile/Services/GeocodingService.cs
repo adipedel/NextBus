@@ -23,13 +23,11 @@ namespace NextBus.Mobile.Services
                 var trimmedQuery = query.Trim();
                 var encoded = Uri.EscapeDataString(trimmedQuery);
 
-                // שימוש ב-Photon עם עדיפות גיאוגרפית לאזור המרכז
                 var url = $"https://photon.komoot.io/api/?q={encoded}&lat=32.0853&lon=34.7818&limit=8";
 
                 var response = await _httpClient.GetFromJsonAsync<PhotonResponse>(url, cancellationToken);
                 if (response?.Features == null || response.Features.Count == 0)
                 {
-                    // Fallback ל-Nominatim עבור מספרי בתים ספציפיים אם Photon לא מצא
                     return await FallbackNominatimSearchAsync(trimmedQuery, cancellationToken);
                 }
 
@@ -42,7 +40,6 @@ namespace NextBus.Mobile.Services
                         var lon = f.Geometry.Coordinates[0];
                         var lat = f.Geometry.Coordinates[1];
 
-                        // הרכבת כתובת מלאה: רחוב + מספר בית + עיר
                         string streetPart = !string.IsNullOrWhiteSpace(f.Properties.Street)
                             ? f.Properties.Street
                             : f.Properties.Name;
@@ -66,7 +63,6 @@ namespace NextBus.Mobile.Services
                             displayTitle = !string.IsNullOrWhiteSpace(streetPart) ? streetPart : trimmedQuery;
                         }
 
-                        // מניעת כפילויות של אותה כתובת
                         if (!results.Any(r => r.DisplayName == displayTitle))
                         {
                             results.Add(new PlacePrediction

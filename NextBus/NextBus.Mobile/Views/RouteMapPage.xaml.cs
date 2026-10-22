@@ -17,7 +17,6 @@ namespace NextBus.Mobile.Views
 
         private void LoadMap(RouteSolution route, double originLat, double originLon, double destLat, double destLon)
         {
-            // בדיקת קיום קואורדינטות תחנות (במידה ועדיין לא אוכלסו ב-API, נשתמש בברירת מחדל של הנקודות)
             double boardLat = route.OriginStationLat != 0 ? route.OriginStationLat : originLat;
             double boardLon = route.OriginStationLon != 0 ? route.OriginStationLon : originLon;
 

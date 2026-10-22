@@ -10,7 +10,6 @@ namespace NextBus.Mobile
         private readonly LocationService _locationService;
         private List<Station> _allStations = new();
 
-        // מיקום ברירת מחדל (מרכז תל אביב) במקרה שאין הרשאה או GPS כבוי
         private double _currentUserLat = 32.0853;
         private double _currentUserLon = 34.7818;
 
@@ -35,7 +34,6 @@ namespace NextBus.Mobile
             LoadingIndicator.IsVisible = true;
             LoadingIndicator.IsRunning = true;
 
-            // 1. שליפת מיקום GPS אמיתי של המכשיר
             var location = await _locationService.GetCurrentLocationAsync();
             if (location != null)
             {
@@ -43,16 +41,13 @@ namespace NextBus.Mobile
                 _currentUserLon = location.Longitude;
             }
 
-            // 2. קבלת התחנות מה-API
             _allStations = await _apiService.GetStationsAsync();
 
-            // 3. חישוב מרחק המשתמש מכל תחנה לפי המיקום הנוכחי שנשלף
             foreach (var station in _allStations)
             {
                 station.DistanceInMeters = CalculateDistance(_currentUserLat, _currentUserLon, station.Latitude, station.Longitude);
             }
 
-            // 4. הצגת תחנות קרובות (עד 600 מטר)
             var nearbyStations = _allStations
                 .Where(s => s.DistanceInMeters <= 600)
                 .OrderBy(s => s.DistanceInMeters)
@@ -83,7 +78,6 @@ namespace NextBus.Mobile
                 return;
             }
 
-            // סינון תוך כדי הקלדה לפי שם או קוד תחנה
             var filtered = _allStations
                 .Where(s => s.Name.ToLower().Contains(query) || (s.StationCode != null && s.StationCode.Contains(query)))
                 .OrderBy(s => s.DistanceInMeters)
@@ -104,7 +98,7 @@ namespace NextBus.Mobile
 
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
-            double r = 6371e3; // רדיוס כדור הארץ במטרים
+            double r = 6371e3; 
             double phi1 = lat1 * Math.PI / 180;
             double phi2 = lat2 * Math.PI / 180;
             double deltaPhi = (lat2 - lat1) * Math.PI / 180;

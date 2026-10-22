@@ -7,7 +7,6 @@
              FlowDirection="LeftToRight">
 
     <Grid RowDefinitions="Auto, *">
-        <!-- סרגל עליון עם כפתור חזרה -->
         <Border Grid.Row="0"
                 BackgroundColor="#1E293B"
                 Padding="16,12"
@@ -36,7 +35,6 @@
             </Grid>
         </Border>
 
-        <!-- רכיב המפה המוטמעת -->
         <WebView x:Name="MapWebView"
                  Grid.Row="1"
                  HorizontalOptions="Fill"

@@ -8,10 +8,10 @@
 
     <Grid RowDefinitions="Auto, Auto, Auto, *" Padding="15,10,15,15">
 
-        <!-- אזור חיפוש כתובות מוצא ויעד -->
+        <!-- origin and destination search -->
         <VerticalStackLayout Grid.Row="0" Spacing="10">
 
-            <!-- מוצא -->
+            <!-- origin -->
             <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
                     <Entry x:Name="OriginSearchEntry"
@@ -55,7 +55,7 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- יעד -->
+            <!-- destination -->
             <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="*, Auto">
                     <Entry x:Name="DestinationSearchEntry"
@@ -103,14 +103,13 @@
                     Margin="0,5,0,0" />
         </VerticalStackLayout>
 
-        <!-- אינדיקטור טעינה -->
         <ActivityIndicator x:Name="LoadingIndicator"
                            Grid.Row="2"
                            IsRunning="False"
                            IsVisible="False"
                            Margin="10" />
 
-        <!-- רשימת המסלולים המוצעים -->
+        <!-- list of routes -->
         <CollectionView x:Name="RoutesCollectionView" Grid.Row="3" Margin="0,10,0,0">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
@@ -122,23 +121,22 @@
                             Padding="18,16"
                             FlowDirection="RightToLeft">
 
-                        <!-- זיהוי לחיצה לפתיחת המפה -->
+                        <!-- open route details -->
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnRouteTapped" />
                         </Border.GestureRecognizers>
 
                         <VerticalStackLayout Spacing="14">
 
-                            <!-- שורה עליונה: תגית הקו מימין, זמן הנסיעה משמאל -->
                             <Grid ColumnDefinitions="*, Auto" FlowDirection="RightToLeft">
 
-                                <!-- צד ימין: מספרי הקווים -->
+                                <!-- line numbers -->
                                 <HorizontalStackLayout Grid.Column="0" 
                                                        HorizontalOptions="Start" 
                                                        VerticalOptions="Center" 
                                                        Spacing="8">
 
-                                    <!-- אם זה קו ישיר -->
+                                    <!-- direct line -->
                                     <Border BackgroundColor="#0284C7"
                                             StrokeShape="RoundRectangle 8"
                                             Padding="12,5"
@@ -149,7 +147,7 @@
                                                FontSize="16"/>
                                     </Border>
 
-                                    <!-- אם זה מסלול עם החלפה -->
+                                    <!-- transfer -->
                                     <HorizontalStackLayout Spacing="6" 
                                                            IsVisible="{Binding IsTransfer}" 
                                                            VerticalOptions="Center">
@@ -163,7 +161,7 @@
                                     </HorizontalStackLayout>
                                 </HorizontalStackLayout>
 
-                                <!-- צד שמאל: סה"כ זמן מסע -->
+                                <!-- total duration -->
                                 <Border Grid.Column="1"
                                         BackgroundColor="#1E293B"
                                         StrokeShape="RoundRectangle 8"
@@ -179,10 +177,9 @@
 
                             <BoxView HeightRequest="1" Color="#1F2937" HorizontalOptions="Fill"/>
 
-                            <!-- ציר זמן המסלול - מיושר לימין -->
                             <VerticalStackLayout Spacing="12" FlowDirection="RightToLeft">
 
-                                <!-- 1. הליכה לתחנה -->
+                                <!-- walk to station -->
                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
                                     <Label Text="{Binding WalkToStationMinutes, StringFormat='הליכה של {0} דק׳ לתחנה'}" 
                                            TextColor="#94A3B8" 
@@ -192,7 +189,7 @@
                                            FontSize="13"/>
                                 </HorizontalStackLayout>
 
-                                <!-- 2. עליה לקו ראשון -->
+                                <!-- first line -->
                                 <VerticalStackLayout Spacing="2" HorizontalOptions="Start">
                                     <HorizontalStackLayout Spacing="6">
                                         <Label Text="עליה בתחנה:" TextColor="#38BDF8" FontAttributes="Bold" FontSize="14"/>
@@ -202,8 +199,7 @@
                                                FontSize="14"/>
                                     </HorizontalStackLayout>
 
-                                    <!-- תגית זמני הגעה של הקו לתחנת העלייה -->
-                                    <!-- תגית זמני הגעה של הקו -->
+                                    <!-- line information -->
                                     <Border BackgroundColor="#0F291E"
                                         Stroke="#166534"
                                         StrokeThickness="1"
@@ -224,7 +220,7 @@
                                         </HorizontalStackLayout>
                                     </Border>
 
-                                    <!-- מספר תחנות נסיעה -->
+                                    <!-- number of stops -->
                                     <Label Text="{Binding FirstLegStops, StringFormat='  נסיעה של {0} תחנות'}"
                                            TextColor="#64748B" 
                                            FontSize="15"
@@ -237,7 +233,7 @@
                                            IsVisible="{Binding IsDirect}"/>
                                 </VerticalStackLayout>
 
-                                <!-- 3. תחנת החלפה (אם קיימת) -->
+                                <!-- transfer -->
                                 <Border BackgroundColor="#1E1B4B"
                                         Stroke="#4338CA"
                                         StrokeThickness="1"
@@ -257,7 +253,7 @@
                                     </VerticalStackLayout>
                                 </Border>
 
-                                <!-- 4. ירידה בתחנת היעד -->
+                                <!--destination stop -->
                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
                                     <Label Text="ירידה בתחנה:" TextColor="#4ADE80" FontAttributes="Bold" FontSize="14"/>
                                     <Label Text="{Binding DestinationStationName}" 
@@ -266,7 +262,7 @@
                                            FontSize="14"/>
                                 </HorizontalStackLayout>
 
-                                <!-- 5. הליכה ליעד סופי -->
+                                <!-- walking to destination -->
                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
                                     <Label Text="{Binding WalkFromStationMinutes, StringFormat='הליכה של {0} דק׳ ליעד'}" 
                                            TextColor="#94A3B8" 

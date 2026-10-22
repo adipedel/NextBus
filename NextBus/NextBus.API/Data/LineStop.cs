@@ -5,6 +5,6 @@
         public int Id { get; set; }
         public int LineId { get; set; }
         public int StationId { get; set; }
-        public int StopSequence { get; set; } // סדר התחנה במסלול הקו (1, 2, 3...)
+        public int StopSequence { get; set; }
     }
 }

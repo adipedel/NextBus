@@ -6,7 +6,6 @@
         {
             try
             {
-                // בדיקת הרשאות מיקום ובקשתן במידת הצורך
                 var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
                 if (status != PermissionStatus.Granted)
                 {
@@ -15,17 +14,15 @@
 
                 if (status != PermissionStatus.Granted)
                 {
-                    return null; // המשתמש דחה את הבקשה
+                    return null; 
                 }
 
-                // ניסיון שליפה מהיר ממיקום שמור אחרון
                 var location = await Geolocation.Default.GetLastKnownLocationAsync();
                 if (location != null && (DateTimeOffset.UtcNow - location.Timestamp).TotalMinutes < 2)
                 {
                     return location;
                 }
 
-                // דגימת מיקום מדויק ועכשווי (עד 8 שניות המתנה)
                 var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(8));
                 return await Geolocation.Default.GetLocationAsync(request);
             }

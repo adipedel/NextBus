@@ -19,7 +19,6 @@ namespace NextBus.API.Controllers
             _realtimeService = realtimeService;
         }
 
-        // שליפת כל התחנות
         [HttpGet]
         public async Task<ActionResult<List<Station>>> GetStations()
         {
@@ -27,7 +26,6 @@ namespace NextBus.API.Controllers
             return Ok(stations);
         }
 
-        // שליפת תחנה בודדת לפי מזהה
         [HttpGet("{id}")]
         public async Task<ActionResult<Station>> GetStation(int id)
         {
@@ -38,9 +36,8 @@ namespace NextBus.API.Controllers
             }
 
             return Ok(station);
-        }
+        } 
 
-        // שליפת זמני הגעה בזמן אמת לפי קוד תחנה (Stop Code)
         [HttpGet("{stopCode}/realtime")]
         public async Task<ActionResult<List<ArrivalRealTime>>> GetRealtime(string stopCode)
         {

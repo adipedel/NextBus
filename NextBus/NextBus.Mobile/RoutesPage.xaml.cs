@@ -24,14 +24,13 @@ namespace NextBus.Mobile
             _geocodingService = new GeocodingService();
             _locationService = new LocationService();
 
-            // חיבור אירועי ההקלדה ישירות בקוד כדי להבטיח זיהוי ב-Windows
             OriginSearchEntry.TextChanged += OnOriginTextChanged;
             DestinationSearchEntry.TextChanged += OnDestinationTextChanged;
         }
 
         private async void OnUseCurrentLocationClicked(object sender, EventArgs e)
         {
-            // קואורדינטות ברירת מחדל: עזריאלי /   
+            // default coordinates for Tel Aviv - Azrieli 
             const double fallbackLat = 32.0754;
             const double fallbackLon = 34.7915;
             const string fallbackName = "תל אביב - עזריאלי (ברירת מחדל)";
@@ -62,7 +61,6 @@ namespace NextBus.Mobile
                 LoadingIndicator.IsVisible = false;
             }
 
-            // אם ה-GPS לא הצליח לקבל מיקום או נזרקה שגיאה - נשתמש בברירת המחדל
             _originLat = fallbackLat;
             _originLon = fallbackLon;
             OriginSearchEntry.Text = fallbackName;
@@ -93,7 +91,6 @@ namespace NextBus.Mobile
 
             try
             {
-                // ממתין 400ms - אם המשתמש ממשיך להקליד, הבקשה מתבטלת ולא נשלחת
                 await Task.Delay(400, token);
 
                 var predictions = await _geocodingService.SearchPlacesAsync(text, token);
@@ -242,7 +239,6 @@ namespace NextBus.Mobile
 
         private async void OnRouteTapped(object sender, TappedEventArgs e)
         {
-            // האלמנט עליו לחצו הוא ה-Border, וה-BindingContext שלו הוא ה-RouteSolution
             if (sender is VisualElement element && element.BindingContext is NextBus.Shared.Models.RouteSolution selectedRoute)
             {
                 if (_originLat.HasValue && _originLon.HasValue && _destLat.HasValue && _destLon.HasValue)

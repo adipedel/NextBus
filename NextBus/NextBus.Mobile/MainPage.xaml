@@ -4,14 +4,14 @@
              x:Class="NextBus.Mobile.MainPage"
              FlowDirection="RightToLeft">
     <Grid RowDefinitions="Auto, Auto, *">
-            <!-- פס חיפוש עליון -->
+            <!-- search bar -->
         <SearchBar x:Name="StationSearchBar"
                    Grid.Row="0"
                    Placeholder="חיפוש לפי שם או קוד תחנה..."
                    TextChanged="OnSearchTextChanged"
                    Margin="10" />
 
-        <!-- חיווי טעינה -->
+        <!-- loading -->
         <ActivityIndicator x:Name="LoadingIndicator"
                            Grid.Row="1"
                            IsRunning="True"
@@ -19,7 +19,7 @@
                            HorizontalOptions="Center"
                            Margin="10" />
 
-        <!-- רשימת התחנות -->
+        <!-- stations list -->
         <CollectionView x:Name="StationsCollectionView"
                         Grid.Row="2"
                         SelectionMode="Single"
@@ -44,7 +44,7 @@
                                        TextColor="#666666" />
                             </VerticalStackLayout>
 
-                            <!-- הצגת מרחק במטרים -->
+                            <!-- distance -->
                             <Label Grid.Column="1"
                                    Text="{Binding DistanceInMeters, StringFormat='{0:F0} מטר'}"
                                    VerticalOptions="Center"
